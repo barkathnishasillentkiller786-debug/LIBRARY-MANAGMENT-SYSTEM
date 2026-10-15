@@ -1,0 +1,109 @@
+```sql
+-- LIBRARY MANAGEMENT SYSTEM
+
+-- 1. CREATE DATABASE
+CREATE DATABASE LibraryDB;
+
+-- 2. SELECT DATABASE
+USE LibraryDB;
+
+-- 3. CREATE BOOKS TABLE
+CREATE TABLE Books (
+    BookID INT PRIMARY KEY,
+    BookName VARCHAR(100),
+    Author VARCHAR(50),
+    Quantity INT
+);
+
+-- 4. CREATE STUDENTS TABLE
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY,
+    StudentName VARCHAR(50),
+    Department VARCHAR(30)
+);
+
+-- 5. CREATE ISSUEBOOKS TABLE
+CREATE TABLE IssueBooks (
+    IssueID INT PRIMARY KEY,
+    BookID INT,
+    StudentID INT,
+    IssueDate DATE,
+    ReturnDate DATE,
+    Status VARCHAR(20),
+    FOREIGN KEY (BookID) REFERENCES Books(BookID),
+    FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
+);
+
+-- 6. INSERT BOOK DETAILS
+INSERT INTO Books VALUES
+(101, 'C Programming', 'Dennis Ritchie', 5),
+(102, 'Java Programming', 'James Gosling', 4),
+(103, 'Database Management', 'Korth', 3),
+(104, 'Python Programming', 'Guido van Rossum', 6),
+(105, 'Computer Networks', 'Andrew Tanenbaum', 2);
+
+-- 7. INSERT STUDENT DETAILS
+INSERT INTO Students VALUES
+(1, 'Nisha', 'IT'),
+(2, 'Ayesha', 'CSE'),
+(3, 'Rahul', 'ECE'),
+(4, 'Priya', 'IT'),
+(5, 'Arun', 'CSE');
+
+-- 8. DISPLAY ALL BOOKS
+SELECT * FROM Books;
+
+-- 9. DISPLAY ALL STUDENTS
+SELECT * FROM Students;
+
+-- 10. ISSUE A BOOK
+START TRANSACTION;
+
+INSERT INTO IssueBooks
+VALUES (1, 101, 1, '2026-10-15', NULL, 'Issued');
+
+UPDATE Books
+SET Quantity = Quantity - 1
+WHERE BookID = 101 AND Quantity > 0;
+
+COMMIT;
+
+-- 11. DISPLAY ISSUED BOOK DETAILS
+SELECT
+    I.IssueID,
+    S.StudentName,
+    B.BookName,
+    I.IssueDate,
+    I.ReturnDate,
+    I.Status
+FROM IssueBooks I
+JOIN Students S ON I.StudentID = S.StudentID
+JOIN Books B ON I.BookID = B.BookID;
+
+-- 12. RETURN A BOOK
+START TRANSACTION;
+
+UPDATE IssueBooks
+SET Status = 'Returned',
+    ReturnDate = '2026-10-20'
+WHERE IssueID = 1 AND Status = 'Issued';
+
+UPDATE Books
+SET Quantity = Quantity + 1
+WHERE BookID = 101
+AND EXISTS (
+    SELECT 1
+    FROM IssueBooks
+    WHERE IssueID = 1
+      AND Status = 'Returned'
+      AND ReturnDate = '2026-10-20'
+);
+
+COMMIT;
+
+-- 13. DISPLAY FINAL ISSUE DETAILS
+SELECT * FROM IssueBooks;
+
+-- 14. DISPLAY UPDATED BOOK QUANTITY
+SELECT * FROM Books;
+```
